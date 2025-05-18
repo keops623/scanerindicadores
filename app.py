@@ -1,6 +1,7 @@
 import requests
-import csv
-import time
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+import csv, time
 from datetime import datetime
 import schedule
 
@@ -13,6 +14,15 @@ URLS       = [
 CSV_FILE   = 'metrics.csv'
 # ——————————————————————————
 
+session = requests.Session()
+retries = Retry(
+    total=3,
+    backoff_factor=1,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=["GET"]
+)
+adapter = HTTPAdapter(max_retries=retries)
+session.mount('https://', adapter)
 
 def fetch_metrics(URLS: str) -> dict:
     """
@@ -24,11 +34,8 @@ def fetch_metrics(URLS: str) -> dict:
         'key': API_KEY,
         'strategy': 'desktop'    # o 'mobile'
     }
-    resp = requests.get(
-        'https://www.googleapis.com/pagespeedonline/v5/runPagespeed',
-        params=params,
-        timeout=30
-    )
+    resp = session.get('https://www.googleapis.com/pagespeedonline/v5/runPagespeed',
+        params=params, timeout=30)
     resp.raise_for_status()
     data   = resp.json()
     audits = data['lighthouseResult']['audits']
@@ -103,6 +110,10 @@ def scan_and_save():
                     met['cls']
                 ])
                 print(f"[{now}] ✔ Métricas guardadas para {url}")
+            except requests.exceptions.ReadTimeout:
+                print(f"[{now}] ⏱ ReadTimeout en {url} tras reintentos. Se omite.")
+            except requests.exceptions.HTTPError as http_err:
+                print(f"[{now}] ⚠ HTTP {http_err.response.status_code} en {url}")
             except Exception as e:
                 print(f"[{now}] ⚠ Error en {url}: {e}")
 
