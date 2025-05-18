@@ -55,7 +55,7 @@ def parse_metrics(data):
 
         return {
             'lcp': lighthouse[METRICS['lcp']]['numericValue'] / 1000,
-            'page_weight': data['lighthouseResult']['audits']['resource-summary']['details']['overallSavingsBytes'] / 1024,
+            'page_weight': sum(item.get('transferSize', 0) for item in lighthouse['resource-summary']['details']['items']) / 1024,
             'tbt': lighthouse[METRICS['tbt']]['numericValue'],
             'speed_index': lighthouse[METRICS['speed_index']]['numericValue'],
             'fcp': lighthouse[METRICS['fcp']]['numericValue'],
