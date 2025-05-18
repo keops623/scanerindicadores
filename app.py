@@ -7,8 +7,8 @@ import schedule
 # —————— CONFIGURACIÓN ——————
 API_KEY    = 'AIzaSyDiQAJkJYFbhf6KMk4Sp3y2QpTIkICP6pA'
 URLS       = [
-    'https://hub.docker.com/_/node',
-    'https://hub.docker.com/_/postgres'
+    'https://corona.co/ambientes-banos/bano-privado',
+    'https://corona.co/productos/servicios/asesorias/c/servicio-asesorias'
 ]
 CSV_FILE   = 'metrics.csv'
 # ——————————————————————————
